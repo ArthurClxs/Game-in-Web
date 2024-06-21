@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <link rel="shortcut icon" type="imagex/png" href="./image/jato.gif">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nave in sky</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #000000;
+            margin: 0;
+        }
+
+        #game-container {
+            position: relative;
+            width: 300px;
+            height: 500px;
+            background-image: url("./image/sky.png");
+            overflow: hidden;
+            border: 1px solid #000;
+        }
+
+        #bird {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            top: 200px;
+            left: 50px;
+        }
+
+        .pipe {
+            position: absolute;
+            width: 50px;
+            background-color: green;
+        }
+
+        #score {
+            position: absolute;
+            top: 10px;
+            left: 130px;
+            font-size: 50px;
+            font-family: Arial, sans-serif;
+            color: #ff7300;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="game-container">
+        <div id="bird">
+            <img src="./image/jato.gif" width="60" height="60">
+        </div>
+        <div id="score">0</div>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const bird = document.getElementById('bird');
+            const gameContainer = document.getElementById('game-container');
+            const scoreDisplay = document.getElementById('score');
+            let birdTop = 200;
+            let birdVelocity = 0;
+            let score = 0;
+            let gameInterval;
+            let pipes = [];
+
+            document.addEventListener('keydown', () => {
+                birdVelocity = -5;
+            });
+
+            function createPipe() {
+                const pipeTop = document.createElement('div');
+                const pipeBottom = document.createElement('div');
+                const pipeHeight = Math.random() * 200 + 50;
+                const gap = 150;
+
+                pipeTop.className = 'pipe';
+                pipeTop.style.height = `${pipeHeight}px`;
+                pipeTop.style.top = '0';
+                pipeTop.style.left = '300px';
+
+                pipeBottom.className = 'pipe';
+                pipeBottom.style.height = `${500 - pipeHeight - gap}px`;
+                pipeBottom.style.bottom = '0';
+                pipeBottom.style.left = '300px';
+
+                gameContainer.appendChild(pipeTop);
+                gameContainer.appendChild(pipeBottom);
+
+                pipes.push({ top: pipeTop, bottom: pipeBottom, left: 300 });
+
+                setTimeout(createPipe, 2000);
+            }
+
+            function updateGame() {
+                birdVelocity += 0.2;
+                birdTop += birdVelocity;
+                bird.style.top = `${birdTop}px`;
+
+                if (birdTop > 470 || birdTop < 0) {
+                    endGame();
+                }
+
+                pipes.forEach(pipe => {
+                    pipe.left -= 2;
+                    pipe.top.style.left = `${pipe.left}px`;
+                    pipe.bottom.style.left = `${pipe.left}px`;
+
+                    if (pipe.left === 50) {
+                        score++;
+                        scoreDisplay.textContent = score;
+                    }
+
+                    if (
+                        pipe.left < 80 &&
+                        pipe.left > 20 &&
+                        (birdTop < pipe.top.offsetHeight || birdTop + 30 > 500 - pipe.bottom.offsetHeight)
+                    ) {
+                        endGame();
+                    }
+                });
+            }
+
+            function endGame() {
+                clearInterval(gameInterval);
+                alert('Game Over! Score: ' + score);
+                location.reload();
+            }
+
+            gameInterval = setInterval(updateGame, 20);
+            createPipe();
+        });
+
+    </script>
+</body>
+
+</html>
